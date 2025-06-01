@@ -1,0 +1,23 @@
+{
+  "name": "claro_dashboard",
+  "version": "1.0.0",
+  "description": "",
+  "main": "main.js",
+  "scripts": {
+    "start:frontend": "cd frontend && cross-env BROWSER=none npm start",
+    "start:backend": "cd backend && uvicorn main:app --host 127.0.0.1 --port 8000 --reload",
+    "start:electron": "wait-on http://localhost:3000 && electron .",
+    "start:dev": "concurrently \"npm run start:backend\" \"npm run start:frontend\" \"npm run start:electron\""
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "concurrently": "^9.1.2",
+    "cross-env": "^7.0.3",
+    "electron": "^36.3.2"
+  },
+  "dependencies": {
+    "wait-on": "^8.0.3"
+  }
+}
