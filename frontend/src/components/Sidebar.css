@@ -1,0 +1,59 @@
+/* /components/Sidebar.css */
+.sidebar {
+  background-color: #982427;
+  color: white;
+  min-height: 100vh;
+  transition: width 0.3s ease;
+  overflow-x: hidden;
+}
+
+.sidebar.open {
+  width: 250px;
+}
+
+.sidebar.closed {
+  width: 80px;
+}
+
+.report-buttons {
+  display: flex;
+  flex-direction: column;
+}
+.sidebar-btn:focus {
+  background-color: #b93838; /* A lighter red or contrasting color */
+  color: white; /* Optional: ensure text is still readable */
+}
+.toggle-btn {
+  align-self: flex-start;
+  width: fit-content;
+}
+
+/* Media Query for screens 768px and below (iPad portrait and phones) */
+@media (max-width: 768px) {
+  .sidebar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    height: 100%;
+    z-index: 1000;
+    width: 0;
+    overflow-x: hidden;
+    transition: width 0.3s ease;
+  }
+
+  .sidebar.open {
+    width: 200px; /* slightly smaller for tablets/phones */
+  }
+
+  .sidebar.closed {
+    width: 40px; /* completely hidden */
+  }
+   .toggle-btn {
+    font-size: 1.5rem;
+    padding: 0.4rem 0.6rem;
+  }
+}
+
+
+
+

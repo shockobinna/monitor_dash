@@ -53,19 +53,20 @@
 }
 
 /* Prevent button from shrinking */
-.search-btn {
+.search-btn { 
+  background-color: #d81d23;
+  color: white;
+  border: none;
   white-space: nowrap;
-  flex-shrink: 0;
 }
 
-
-/* App.css */
-.app-layout {
-  display: flex;
-}
-
-.main-content {
-  background-color: #f8f9fa;
-  min-height: 100vh;
+/* Force same color on hover */
+.search-btn:hover,
+.search-btn:focus,
+.search-btn:active {
+  background-color: #d81d23;
+  color: white;
+  border: none;
+ 
 }
 
