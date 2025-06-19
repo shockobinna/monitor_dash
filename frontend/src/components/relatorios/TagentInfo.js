@@ -77,7 +77,8 @@ function TagentInfo() {
       <div className='row align-items-stretch mb-5'>
         
         <div className='col d-flex align-items-end'>
-           <h1 className="title m-0">Dashboard Claro</h1>
+           <h1 className="title m-0">Dashboard <img className="claro-logo" src={process.env.PUBLIC_URL + '/claro-logo-1-1.png'} alt="Logo" />
+          </h1>
 
         </div>
         <div className='col d-flex justify-content-end gap-2'>

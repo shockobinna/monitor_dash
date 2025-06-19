@@ -12,8 +12,9 @@ export const fetchTagentData = createAsyncThunk(
   'tagentInfo/fetchData',
   async (_, { rejectWithValue }) => {
     try {
-      const res = await axios.get('http://localhost:8000/dashboard'); //http://localhost:3001/report_name'
-      const data = res.data.report_name;
+      const res = await axios.get('http://localhost:3001/report_name'); //http://localhost:3001/report_name' //'http://localhost:8000/dashboard'
+      //const data = res.data.report_name;
+      const data = res.data;
 
       // Grouped data by BU
       const grouped = data.reduce((acc, item) => {

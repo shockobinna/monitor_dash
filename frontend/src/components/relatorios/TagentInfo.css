@@ -11,6 +11,11 @@
   color : red;
   
 }
+.claro-logo{
+  width: 100px;
+  height: 'auto';
+  margin-bottom: 20px;
+}
 
 .card-container, .graph{
   display: flex;

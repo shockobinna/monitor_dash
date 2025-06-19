@@ -8,6 +8,16 @@ const reports = [
   { id: 'hagentD1', name: 'HAgentD1' },
   { id: 'hsplitD1', name: 'HSplitD1' },
   { id: 'billogD1', name: 'BillogD1' },
+  {id:'realtime', name:'CXOnexReportsRealtime'},
+  { id: 'discadormailin', name:'DISCADOR MAILING'},
+  { id: 'mailingpersonalconnect', name: 'Mailing Personal Connect'},
+  { id: 'datadownload552 ', name: 'Data Download 552' },
+  { id:'neoinxnice', name:'NeoInXNice'},
+  { id:'agentslog ', name:'Agents Log'},
+  { id:'loginlogout ', name:'LoginLogout'},
+  { id:'callback ', name:'Callback '}
+
+
 ];
 
 export default function Sidebar() {

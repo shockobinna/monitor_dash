@@ -32,6 +32,10 @@ def get_connection():
         mode=oracledb.AUTH_MODE_SYSDBA
     )
 
+def format_datetime(dt):
+    if isinstance(dt, datetime):
+        return dt.strftime("%d/%m/%Y %H:%M:%S")
+    return dt
 
 @app.get("/dashboard")
 
@@ -40,66 +44,112 @@ def read_data():
         conn = get_connection()
         cur = conn.cursor()
 
-        # Query: summary
+        # Query 1: Summary
         sql_summary = """
-            SELECT report_name, bu, start_date, end_date, TRUNC(process_date) AS process_date
-            FROM tb_rel_nice_summary
-            WHERE report_name = 'TAGENTINFO'
-              AND process_date IS NOT NULL
+            SELECT 
+                report_name, 
+                bu, 
+                START_DATE, 
+                END_DATE, 
+                process_date
+            FROM 
+                tb_rel_nice_summary  
+            WHERE 
+                process_date >= TRUNC(SYSDATE) - 6
+                AND process_date <= TRUNC(SYSDATE)
+                AND process_date IS NOT NULL  
+                AND report_name = 'TAGENTINFO'
+            ORDER BY 
+                process_date DESC
         """
         cur.execute(sql_summary)
         summary_rows = cur.fetchall()
-        summary_columns = [col[0].lower() for col in cur.description]
 
-        # Query: tagentinfo
+        # Format summary into desired structure
+        summary_data = {}
+        report_name_key = "TAGENTINFO"
+        summary_data[report_name_key] = []
+
+        for idx, row in enumerate(summary_rows, start=1):
+            report_name, bu, start_date, end_date, process_date = row
+            summary_data[report_name_key].append({
+                "id": idx,
+                "start_date": format_datetime(start_date),
+                "end_date": format_datetime(end_date),
+                "bu": str(bu),
+                "process_date": format_datetime(process_date)
+            })
+
+        # Query 2: TAGENTINFO aggregation
         sql_tagentinfo = """
-            SELECT bu, TRUNC(row_date) AS row_date, SUM(quantidade) AS quantidade
-            FROM tb_rel_nice_tagentinfo
-            WHERE row_date IS NOT NULL
-            GROUP BY bu, TRUNC(row_date)
+            SELECT 
+                COUNT(*) AS quantidade, 
+                bu, 
+                TO_CHAR(row_date, 'YYYY-MM-DD') AS dataDados
+            FROM 
+                TB_REL_NICE_TAGENTINFO
+            WHERE 
+                row_date >= TRUNC(SYSDATE) - 7
+                AND row_date <= TRUNC(SYSDATE)
+            GROUP BY 
+                bu, TO_CHAR(row_date, 'YYYY-MM-DD')
+            ORDER BY 
+                dataDados DESC, bu
         """
         cur.execute(sql_tagentinfo)
-        tagent_rows = cur.fetchall()
+        tagentinfo_rows = cur.fetchall()
 
-        # Lookup map
-        tagent_lookup = {
-            (str(bu), row_date.strftime('%Y-%m-%d')): int(quantidade)
-            for bu, row_date, quantidade in tagent_rows if row_date
-        }
-
-        # Merge logic: only if match exists
-        result = []
-        idx = 1
-        for row in summary_rows:
-            row_dict = dict(zip(summary_columns, row))
-            bu = str(row_dict["bu"])
-            proc_date = row_dict["process_date"]
-            proc_key = proc_date.strftime('%Y-%m-%d') if proc_date else None
-
-            key = (bu, proc_key)
-            if key not in tagent_lookup:
-                continue  # Skip rows without a match
-
-            quantidade = tagent_lookup[key]
-
-            result.append({
+        # Add unique ID and convert bu to string
+        tagentinfo_data = [
+            {
                 "id": idx,
-                "report_name": row_dict["report_name"],
-                "bu": bu,
-                "start_date": row_dict["start_date"].strftime("%d/%m/%Y") if row_dict["start_date"] else None,
-                "end_date": row_dict["end_date"].strftime("%d/%m/%Y") if row_dict["end_date"] else None,
-                "process_date": proc_date.strftime("%d/%m/%Y") if proc_date else None,
-                "quantity_processed": quantidade
-            })
-            idx += 1
+                "quantidade": row[0],
+                "bu": str(row[1]),
+                "datadados": row[2]
+            }
+            for idx, row in enumerate(tagentinfo_rows, start=1)
+        ]
 
-        cur.close()
-        conn.close()
-
-        return {"report_name": result}
+        return {
+            "summary": summary_data["TAGENTINFO"],
+            "tagentinfo": tagentinfo_data
+        }
 
     except Exception as e:
         return JSONResponse(status_code=500, content={"error": str(e)})
+    
+# SELECT 
+#     report_name, 
+#     bu, 
+#     START_DATE, 
+#     END_DATE, 
+#     process_date
+# FROM 
+#     tb_rel_nice_summary  
+# WHERE 
+#     process_date >= TRUNC(SYSDATE) - 6  -- 6 days ago (start)
+#     AND process_date <= TRUNC(SYSDATE)  -- today (end)
+#     AND process_date IS NOT NULL  
+#     AND report_name = 'TAGENTINFO'
+# ORDER BY 
+#     process_date DESC;
+
+    
+# Query - Quantidade de Registros (D-1) 
+# SELECT 
+#     COUNT(*) AS quantidade, 
+#     bu, 
+#     TO_CHAR(row_date, 'YYYY-MM-DD') AS dataDados
+# FROM 
+#     TB_REL_NICE_TAGENTINFO
+# WHERE 
+#     row_date >= TRUNC(SYSDATE) - 7      -- 7 days ago (from yesterday)
+#     AND row_date <= TRUNC(SYSDATE)  -- yesterday
+# GROUP BY 
+#     bu, TO_CHAR(row_date, 'YYYY-MM-DD')
+# ORDER BY 
+#     dataDados DESC, bu;
+
 
 
 #     SELECT report_name, bu, START_DATE, END_DATE, process_date 
@@ -110,7 +160,7 @@ def read_data():
 #   -- AND bu = 4602389 -- 4602389 = C47 ou 4602920 = C51 
  
 
-# Query - Quantidade de Registros (D-1) 
+# # Query - Quantidade de Registros (D-1) 
 
  
 # SELECT count(*) AS quantidade, bu, TO_CHAR(row_date,'YYYY-MM-DD') AS dataDados  
@@ -119,5 +169,31 @@ def read_data():
 # GROUP BY bu, row_date -- 4602389 = C47 ou 4602920 =
 
 # npm run start:dev/prod
+
+# SELECT 
+#     s.report_name,
+#     s.bu,
+#     s.START_DATE,
+#     s.END_DATE,
+#     s.process_date,
+#     t.quantidade
+# FROM 
+#     tb_rel_nice_summary s
+# LEFT JOIN (
+#     SELECT 
+#         bu, 
+#         COUNT(*) AS quantidade
+#     FROM 
+#         TB_REL_NICE_TAGENTINFO
+#     WHERE 
+#         TO_CHAR(row_date, 'YYYY-MM-DD') = '2025-06-01'
+#     GROUP BY 
+#         bu
+# ) t ON s.bu = t.bu
+# WHERE 
+#     s.process_date = TO_DATE('2025-06-02 00:00', 'YYYY-MM-DD HH24:MI')
+#     AND s.process_date IS NOT NULL
+#     AND s.report_name IN ('TAGENTINFO');
+
 
 
