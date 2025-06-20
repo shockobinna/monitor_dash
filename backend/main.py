@@ -55,7 +55,7 @@ def read_data():
             FROM 
                 tb_rel_nice_summary  
             WHERE 
-                process_date >= TRUNC(SYSDATE) - 6
+                process_date >= TRUNC(SYSDATE) - 16
                 AND process_date <= TRUNC(SYSDATE)
                 AND process_date IS NOT NULL  
                 AND report_name = 'TAGENTINFO'
@@ -89,7 +89,7 @@ def read_data():
             FROM 
                 TB_REL_NICE_TAGENTINFO
             WHERE 
-                row_date >= TRUNC(SYSDATE) - 7
+                row_date >= TRUNC(SYSDATE) - 17
                 AND row_date <= TRUNC(SYSDATE)
             GROUP BY 
                 bu, TO_CHAR(row_date, 'YYYY-MM-DD')
