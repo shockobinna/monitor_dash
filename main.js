@@ -25,8 +25,8 @@ function createWindow() {
 
 app.whenReady().then(() => {
   if (!isDev) {
-    backend = spawn('uvicorn', ['main:app', '--host', '127.0.0.1', '--port', '8000'], {
-      cwd: path.join(__dirname, 'backend'),
+    const backendPath = path.join(__dirname, 'start_backend.exe');
+    backend = spawn(backendPath, {
       shell: true,
       stdio: 'pipe',
     });

@@ -7,7 +7,31 @@
     "start:frontend": "cd frontend && cross-env BROWSER=none npm start",
     "start:backend": "cd backend && uvicorn main:app --host 127.0.0.1 --port 8000 --reload",
     "start:electron": "wait-on http://localhost:3000 && electron .",
-    "start:dev": "concurrently \"npm run start:backend\" \"npm run start:frontend\" \"npm run start:electron\""
+    "start:dev": "concurrently \"npm run start:backend\" \"npm run start:frontend\" \"npm run start:electron\"",
+    "postinstall": "electron-builder install-app-deps",
+    "build": "electron-builder"
+  },
+  "build": {
+    "appId": "com.example.claro_dashboard",
+    "productName": "Claro Dashboard",
+    "files": [
+      "main.js",
+      "frontend/build/**/*",
+      "start_backend.exe"
+    ],
+    "extraResources": [
+      {
+        "from": "backend/dist/start_backend.exe",
+        "to": "start_backend.exe"
+      }
+    ],
+    "win": {
+      "target": "nsis"
+    },
+    "directories": {
+      "buildResources": "assets"
+    }
+
   },
   "keywords": [],
   "author": "",
@@ -15,7 +39,8 @@
   "devDependencies": {
     "concurrently": "^9.1.2",
     "cross-env": "^7.0.3",
-    "electron": "^36.3.2"
+    "electron": "^36.3.2",
+    "electron-builder": "^26.0.12"
   },
   "dependencies": {
     "wait-on": "^8.0.3"
