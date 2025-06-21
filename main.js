@@ -1,4 +1,4 @@
-const { app, BrowserWindow } = require('electron');
+const { app, BrowserWindow, dialog } = require('electron');
 const path = require('path');
 const { spawn } = require('child_process');
 const waitOn = require('wait-on');
@@ -21,11 +21,13 @@ function createWindow() {
   } else {
     win.loadFile(path.join(__dirname, 'frontend', 'build', 'index.html'));
   }
+
+  return win;
 }
 
 app.whenReady().then(() => {
   if (!isDev) {
-    const backendPath = path.join(__dirname, 'start_backend.exe');
+    const backendPath = path.join(process.resourcesPath, 'start_backend.exe');
     backend = spawn(backendPath, {
       shell: true,
       stdio: 'pipe',
@@ -43,31 +45,28 @@ app.whenReady().then(() => {
       console.log(`Backend process exited with code ${code}`);
     });
 
-    // Wait until backend URL is ready before creating the window
     waitOn(
       {
         resources: ['http://127.0.0.1:8000/dashboard'],
-        timeout: 10000, // 10 seconds timeout
+        timeout: 10000,
       },
       (err) => {
         if (err) {
           console.error('Backend did not become available:', err);
-          app.quit();
-          return;
+          dialog.showErrorBox(
+            'Backend Error',
+            'The backend service failed to start. Some features may not work.'
+          );
         }
-        createWindow();
+        createWindow(); // ✅ Always show the UI whether backend worked or not
       }
     );
   } else {
-    createWindow();
+    createWindow(); // ✅ In dev mode, open immediately
   }
 
   app.on('window-all-closed', () => {
-    if (backend) {
-      backend.kill();
-    }
-    if (process.platform !== 'darwin') {
-      app.quit();
-    }
+    if (backend) backend.kill();
+    if (process.platform !== 'darwin') app.quit();
   });
 });

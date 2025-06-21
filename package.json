@@ -18,6 +18,8 @@
       "main.js",
       "frontend/build/**/*",
       "start_backend.exe"
+      
+      
     ],
     "extraResources": [
       {
