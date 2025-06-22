@@ -37,7 +37,7 @@ def format_datetime(dt):
         return dt.strftime("%d/%m/%Y %H:%M:%S")
     return dt
 
-@app.get("/dashboard")
+@app.api_route("/dashboard", methods=["GET", "HEAD"])
 
 def read_data():
     try:
