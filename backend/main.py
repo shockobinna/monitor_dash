@@ -1,4 +1,4 @@
-from fastapi import FastAPI
+from fastapi import FastAPI,Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from datetime import datetime
@@ -18,7 +18,7 @@ app.add_middleware(
         "http://localhost:3000",
         "http://127.0.0.1:3000",
     ],
-    allow_methods=["GET"],
+    allow_methods=["GET", "HEAD"],
     allow_headers=["*"],
 )
 
@@ -39,7 +39,10 @@ def format_datetime(dt):
 
 @app.api_route("/dashboard", methods=["GET", "HEAD"])
 
-def read_data():
+def read_data(request:Request):
+    if request.method == "HEAD":
+        return JSONResponse(status_code=200, content=None)
+    
     try:
         conn = get_connection()
         cur = conn.cursor()
