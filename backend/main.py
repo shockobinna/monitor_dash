@@ -1,4 +1,4 @@
-from fastapi import FastAPI,Request
+from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from datetime import datetime
@@ -38,8 +38,7 @@ def format_datetime(dt):
     return dt
 
 @app.api_route("/dashboard", methods=["GET", "HEAD"])
-
-def read_data(request:Request):
+async def read_data(request: Request):  # <-- make it async to handle awaitables if needed
     if request.method == "HEAD":
         return JSONResponse(status_code=200, content=None)
     
