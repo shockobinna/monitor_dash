@@ -6,8 +6,6 @@ import oracledb
 import os
 from dotenv import load_dotenv
 
-
-
 app = FastAPI()
 
 load_dotenv()
@@ -27,7 +25,6 @@ def get_connection():
     return oracledb.connect(
         user=os.getenv("USER"),
         password=os.getenv("PASSWORD"),
-        # dsn="localhost/orclpdb1"  # Use proper TNS or Easy Connect string
         dsn=os.getenv("DSN"),  # Replace with actual service name
         mode=oracledb.AUTH_MODE_SYSDBA
     )
@@ -37,11 +34,13 @@ def format_datetime(dt):
         return dt.strftime("%d/%m/%Y %H:%M:%S")
     return dt
 
-@app.api_route("/dashboard", methods=["GET", "HEAD"])
-async def read_data(request: Request):
-    if request.method == "HEAD":
-        return JSONResponse(status_code=200, content=None)
-    
+@app.head("/dashboard")
+async def dashboard_health_check():
+    # Just respond 200 OK for HEAD requests to /dashboard without body
+    return JSONResponse(status_code=200)
+
+@app.get("/dashboard")
+async def read_data():
     try:
         conn = get_connection()
         cur = conn.cursor()
@@ -68,13 +67,10 @@ async def read_data(request: Request):
         summary_rows = cur.fetchall()
 
         # Format summary into desired structure
-        summary_data = {}
-        report_name_key = "TAGENTINFO"
-        summary_data[report_name_key] = []
-
+        summary_data = []
         for idx, row in enumerate(summary_rows, start=1):
             report_name, bu, start_date, end_date, process_date = row
-            summary_data[report_name_key].append({
+            summary_data.append({
                 "id": idx,
                 "start_date": format_datetime(start_date),
                 "end_date": format_datetime(end_date),
@@ -101,7 +97,6 @@ async def read_data(request: Request):
         cur.execute(sql_tagentinfo)
         tagentinfo_rows = cur.fetchall()
 
-        # Add unique ID and convert bu to string
         tagentinfo_data = [
             {
                 "id": idx,
@@ -113,12 +108,13 @@ async def read_data(request: Request):
         ]
 
         return {
-            "summary": summary_data["TAGENTINFO"],
+            "summary": summary_data,
             "tagentinfo": tagentinfo_data
         }
 
     except Exception as e:
         return JSONResponse(status_code=500, content={"error": str(e)})
+
 
 # @app.api_route("/dashboard", methods=["GET", "HEAD"])
 # async def read_data(request: Request):  # <-- make it async to handle awaitables if needed
