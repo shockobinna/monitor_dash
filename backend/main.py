@@ -1,6 +1,6 @@
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import JSONResponse
+from fastapi.responses import Response, JSONResponse
 from datetime import datetime
 import oracledb
 import os
@@ -37,7 +37,7 @@ def format_datetime(dt):
 @app.head("/dashboard")
 async def dashboard_health_check():
     # Just respond 200 OK for HEAD requests to /dashboard without body
-    return JSONResponse(status_code=200)
+    return Response(status_code=200)
 
 @app.get("/dashboard")
 async def read_data():
