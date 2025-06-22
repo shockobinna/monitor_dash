@@ -12,7 +12,7 @@ export const fetchTagentData = createAsyncThunk(
   'tagentInfo/fetchData',
   async (_, { rejectWithValue }) => {
     try {
-      const res = await axios.get('http://localhost:8000/dashboard'); //http://localhost:3001/report_name' //'http://localhost:8000/dashboard'
+      const res = await axios.get('http://127.0.0.1:8000/dashboard'); //http://localhost:3001/report_name' //'http://localhost:8000/dashboard'
       const data = res.data.summary;
       const tagentinfo = res.data.tagentinfo;
       // const data = res.data;
