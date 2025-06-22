@@ -22,6 +22,8 @@ function createWindow() {
     win.loadFile(path.join(__dirname, 'frontend', 'build', 'index.html'));
   }
 
+  win.webContents.openDevTools();
+
   return win;
 }
 

@@ -38,7 +38,7 @@ def format_datetime(dt):
     return dt
 
 @app.api_route("/dashboard", methods=["GET", "HEAD"])
-async def read_data(request: Request):  # <-- make it async to handle awaitables if needed
+async def read_data(request: Request):
     if request.method == "HEAD":
         return JSONResponse(status_code=200, content=None)
     
@@ -119,6 +119,89 @@ async def read_data(request: Request):  # <-- make it async to handle awaitables
 
     except Exception as e:
         return JSONResponse(status_code=500, content={"error": str(e)})
+
+# @app.api_route("/dashboard", methods=["GET", "HEAD"])
+# async def read_data(request: Request):  # <-- make it async to handle awaitables if needed
+#     if request.method == "HEAD":
+#         return JSONResponse(status_code=200, content=None)
+    
+#     try:
+#         conn = get_connection()
+#         cur = conn.cursor()
+
+#         # Query 1: Summary
+#         sql_summary = """
+#             SELECT 
+#                 report_name, 
+#                 bu, 
+#                 START_DATE, 
+#                 END_DATE, 
+#                 process_date
+#             FROM 
+#                 tb_rel_nice_summary  
+#             WHERE 
+#                 process_date >= TRUNC(SYSDATE) - 16
+#                 AND process_date <= TRUNC(SYSDATE)
+#                 AND process_date IS NOT NULL  
+#                 AND report_name = 'TAGENTINFO'
+#             ORDER BY 
+#                 process_date DESC
+#         """
+#         cur.execute(sql_summary)
+#         summary_rows = cur.fetchall()
+
+#         # Format summary into desired structure
+#         summary_data = {}
+#         report_name_key = "TAGENTINFO"
+#         summary_data[report_name_key] = []
+
+#         for idx, row in enumerate(summary_rows, start=1):
+#             report_name, bu, start_date, end_date, process_date = row
+#             summary_data[report_name_key].append({
+#                 "id": idx,
+#                 "start_date": format_datetime(start_date),
+#                 "end_date": format_datetime(end_date),
+#                 "bu": str(bu),
+#                 "process_date": format_datetime(process_date)
+#             })
+
+#         # Query 2: TAGENTINFO aggregation
+#         sql_tagentinfo = """
+#             SELECT 
+#                 COUNT(*) AS quantidade, 
+#                 bu, 
+#                 TO_CHAR(row_date, 'YYYY-MM-DD') AS dataDados
+#             FROM 
+#                 TB_REL_NICE_TAGENTINFO
+#             WHERE 
+#                 row_date >= TRUNC(SYSDATE) - 17
+#                 AND row_date <= TRUNC(SYSDATE)
+#             GROUP BY 
+#                 bu, TO_CHAR(row_date, 'YYYY-MM-DD')
+#             ORDER BY 
+#                 dataDados DESC, bu
+#         """
+#         cur.execute(sql_tagentinfo)
+#         tagentinfo_rows = cur.fetchall()
+
+#         # Add unique ID and convert bu to string
+#         tagentinfo_data = [
+#             {
+#                 "id": idx,
+#                 "quantidade": row[0],
+#                 "bu": str(row[1]),
+#                 "datadados": row[2]
+#             }
+#             for idx, row in enumerate(tagentinfo_rows, start=1)
+#         ]
+
+#         return {
+#             "summary": summary_data["TAGENTINFO"],
+#             "tagentinfo": tagentinfo_data
+#         }
+
+#     except Exception as e:
+#         return JSONResponse(status_code=500, content={"error": str(e)})
     
 # SELECT 
 #     report_name, 
