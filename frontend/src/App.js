@@ -25,7 +25,7 @@
 // export default App;
 
 import React from 'react';
-import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { HashRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import Sidebar from './components/Sidebar';
 import TagentInfo from './components/relatorios/TagentInfo';
 // import InventoryReport from './components/relatorios/InventoryReport';
