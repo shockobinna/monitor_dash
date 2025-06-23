@@ -34,7 +34,7 @@ def format_datetime(dt):
         return dt.strftime("%d/%m/%Y %H:%M:%S")
     return dt
 
-@app.head("/dashboard")
+@app.head("/health")
 async def dashboard_health_check():
     # Just respond 200 OK for HEAD requests to /dashboard without body
     return Response(status_code=200)
