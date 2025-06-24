@@ -22,7 +22,7 @@ function createWindow() {
     win.loadFile(path.join(__dirname, 'frontend', 'build', 'index.html'));
   }
 
-  win.webContents.openDevTools();
+  //win.webContents.openDevTools();
 
   return win;
 }
@@ -33,6 +33,7 @@ app.whenReady().then(() => {
     backend = spawn(backendPath, {
       shell: true,
       stdio: 'pipe',
+      cwd: path.dirname(backendPath),// 🟢 Set working dir = where .env will be
     });
 
     backend.stdout.on('data', (data) => {

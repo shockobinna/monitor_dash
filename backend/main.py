@@ -4,11 +4,21 @@ from fastapi.responses import Response, JSONResponse
 from datetime import datetime
 import oracledb
 import os
+import sys
 from dotenv import load_dotenv
 
 app = FastAPI()
 
-load_dotenv()
+# Find .env path based on whether running as bundled executable
+if getattr(sys, 'frozen', False):
+    base_dir = sys._MEIPASS if hasattr(sys, '_MEIPASS') else os.path.dirname(sys.executable)
+else:
+    base_dir = os.path.dirname(os.path.abspath(__file__))
+
+env_path = os.path.join(base_dir, '.env')
+load_dotenv(dotenv_path=env_path)
+
+# load_dotenv()
 
 app.add_middleware(
     CORSMiddleware,
