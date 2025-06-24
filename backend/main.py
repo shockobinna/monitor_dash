@@ -17,6 +17,8 @@ else:
 
 env_path = os.path.join(base_dir, '.env')
 load_dotenv(dotenv_path=env_path)
+print(f"Loading .env from: {env_path}")
+print(f"Oracle user: {os.getenv('USER')}")
 
 # load_dotenv()
 
