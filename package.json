@@ -25,15 +25,15 @@
       {
         "from": "backend/dist/start_backend.exe",
         "to": "start_backend.exe"
-      },
-      {
-      "from": "backend/dist/.env",
-      "to": ".env"
-    }
+      }
+      
     ],
     "win": {
       "target": "nsis"
     },
+    "nsis": {
+    "runAfterFinish": false
+  },
     "directories": {
       "buildResources": "assets"
     }

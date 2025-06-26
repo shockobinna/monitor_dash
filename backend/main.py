@@ -10,15 +10,23 @@ from dotenv import load_dotenv
 app = FastAPI()
 
 # Find .env path based on whether running as bundled executable
-if getattr(sys, 'frozen', False):
-    base_dir = sys._MEIPASS if hasattr(sys, '_MEIPASS') else os.path.dirname(sys.executable)
-else:
-    base_dir = os.path.dirname(os.path.abspath(__file__))
 
-env_path = os.path.join(base_dir, '.env')
-load_dotenv(dotenv_path=env_path)
+if getattr(sys, 'frozen', False):
+    # In production (.exe): look relative to the executable
+    base_dir = os.path.dirname(sys.executable)
+    env_path = os.path.join(base_dir, '.env')
+else:
+    # In development: look in the current folder
+    base_dir = os.path.dirname(__file__)
+    env_path = os.path.join(base_dir, '.env')
+
 print(f"Loading .env from: {env_path}")
+load_dotenv(dotenv_path=env_path)
 print(f"Oracle user: {os.getenv('USER')}")
+print(f" Loaded .env from: {env_path}")
+print(f" Oracle user: {os.getenv('USER')}")
+print(f" Oracle password: {os.getenv('PASSWORD')}")
+print(f" Oracle DSN: {os.getenv('DSN')}")
 
 # load_dotenv()
 
@@ -125,6 +133,8 @@ async def read_data():
         }
 
     except Exception as e:
+        import traceback
+        traceback.print_exc()
         return JSONResponse(status_code=500, content={"error": str(e)})
 
 

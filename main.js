@@ -22,8 +22,6 @@ function createWindow() {
     win.loadFile(path.join(__dirname, 'frontend', 'build', 'index.html'));
   }
 
-  //win.webContents.openDevTools();
-
   return win;
 }
 
@@ -33,7 +31,7 @@ app.whenReady().then(() => {
     backend = spawn(backendPath, {
       shell: true,
       stdio: 'pipe',
-      cwd: path.dirname(backendPath),// 🟢 Set working dir = where .env will be
+      cwd: path.dirname(backendPath),
     });
 
     backend.stdout.on('data', (data) => {
@@ -61,15 +59,28 @@ app.whenReady().then(() => {
             'The backend service failed to start. Some features may not work.'
           );
         }
-        createWindow(); // ✅ Always show the UI whether backend worked or not
+        createWindow();
       }
     );
   } else {
-    createWindow(); // ✅ In dev mode, open immediately
+    createWindow();
   }
 
   app.on('window-all-closed', () => {
-    if (backend) backend.kill();
-    if (process.platform !== 'darwin') app.quit();
+    if (backend) {
+      console.log('Killing backend process...');
+      backend.kill(); // Safer across platforms
+    }
+
+    if (process.platform !== 'darwin') {
+      app.quit();
+    }
+  });
+
+  app.on('before-quit', () => {
+    if (backend) {
+      console.log('App is quitting. Killing backend...');
+      backend.kill();
+    }
   });
 });
