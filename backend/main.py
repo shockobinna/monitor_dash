@@ -1,4 +1,4 @@
-from fastapi import FastAPI, Request
+from fastapi import FastAPI, Request, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import Response, JSONResponse
 from datetime import datetime
@@ -46,7 +46,7 @@ def get_connection():
         user=os.getenv("USER"),
         password=os.getenv("PASSWORD"),
         dsn=os.getenv("DSN"),  # Replace with actual service name
-        mode=oracledb.AUTH_MODE_SYSDBA
+        # mode=oracledb.AUTH_MODE_SYSDBA
     )
 
 def format_datetime(dt):
@@ -59,8 +59,19 @@ async def dashboard_health_check():
     # Just respond 200 OK for HEAD requests to /dashboard without body
     return Response(status_code=200)
 
-@app.get("/dashboard")
-async def read_data():
+# Whitelist of allowed report names (case-insensitive)
+ALLOWED_REPORTS = {"TAGENTINFO", "HAGENT", "DAYLOG", "FSPLIT"}
+
+@app.get("/dashboard/{report_name}")
+async def read_data(report_name: str):
+    print(report_name)
+    report_key = report_name.upper()
+
+    # Validate against whitelist
+    if report_key not in ALLOWED_REPORTS:
+        raise HTTPException(status_code=400, detail="Invalid report name")
+
+    table_name = f"TB_REL_NICE_{report_key}"
     try:
         conn = get_connection()
         cur = conn.cursor()
@@ -76,14 +87,14 @@ async def read_data():
             FROM 
                 tb_rel_nice_summary  
             WHERE 
-                process_date >= TRUNC(SYSDATE) - 16
+                process_date >= TRUNC(SYSDATE) - 26
                 AND process_date <= TRUNC(SYSDATE)
                 AND process_date IS NOT NULL  
-                AND report_name = 'TAGENTINFO'
+                AND report_name = :report_name
             ORDER BY 
                 process_date DESC
         """
-        cur.execute(sql_summary)
+        cur.execute(sql_summary, report_name=report_name)
         summary_rows = cur.fetchall()
 
         # Format summary into desired structure
@@ -99,44 +110,44 @@ async def read_data():
             })
 
         # Query 2: TAGENTINFO aggregation
-        sql_tagentinfo = """
+        sql_countinfo = f"""
             SELECT 
                 COUNT(*) AS quantidade, 
                 bu, 
                 TO_CHAR(row_date, 'YYYY-MM-DD') AS dataDados
             FROM 
-                TB_REL_NICE_TAGENTINFO
+                {table_name}
             WHERE 
-                row_date >= TRUNC(SYSDATE) - 17
+                row_date >= TRUNC(SYSDATE) - 27 
                 AND row_date <= TRUNC(SYSDATE)
             GROUP BY 
                 bu, TO_CHAR(row_date, 'YYYY-MM-DD')
             ORDER BY 
                 dataDados DESC, bu
         """
-        cur.execute(sql_tagentinfo)
-        tagentinfo_rows = cur.fetchall()
+        cur.execute(sql_countinfo)
+        count_rows = cur.fetchall()
 
-        tagentinfo_data = [
+        count_data = [
             {
                 "id": idx,
                 "quantidade": row[0],
                 "bu": str(row[1]),
                 "datadados": row[2]
             }
-            for idx, row in enumerate(tagentinfo_rows, start=1)
+            for idx, row in enumerate(count_rows, start=1)
         ]
-
+        print(summary_data)
+        print(count_data)
         return {
             "summary": summary_data,
-            "tagentinfo": tagentinfo_data
+            "totalcount": count_data
         }
 
     except Exception as e:
         import traceback
         traceback.print_exc()
         return JSONResponse(status_code=500, content={"error": str(e)})
-
 
 # @app.api_route("/dashboard", methods=["GET", "HEAD"])
 # async def read_data(request: Request):  # <-- make it async to handle awaitables if needed
