@@ -46,7 +46,7 @@ def get_connection():
         user=os.getenv("USER"),
         password=os.getenv("PASSWORD"),
         dsn=os.getenv("DSN"),  # Replace with actual service name
-        # mode=oracledb.AUTH_MODE_SYSDBA
+        mode=oracledb.AUTH_MODE_SYSDBA
     )
 
 def format_datetime(dt):

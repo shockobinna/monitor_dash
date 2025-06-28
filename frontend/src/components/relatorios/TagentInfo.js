@@ -1,18 +1,20 @@
-import React, { useEffect, useState } from 'react';
-import axios from 'axios';
-import { BASE_URL } from '../../config';
+import React, { useEffect} from 'react';
+// import axios from 'axios';
+// import { BASE_URL } from '../../config';
 import './TagentInfo.css'
 import LineChart from '../../components/charts/LineChart'
 import { useDispatch, useSelector } from 'react-redux';
 import { fetchTagentData } from '../../features/tagentinfo/tagentInfoSlice';
+import { useParams } from 'react-router-dom'; // Assuming React Router
 
 
 function TagentInfo() {
-  // const [groupedData, setGroupedData] = useState({});
-  // const [chartData, setChartData] = useState([]);
-  // const [error, setError] = useState(null);
+
   const dispatch = useDispatch();
-  const { groupedData, chartData, error, loading } = useSelector(state => state.tagentInfo);
+  const { reports, error, loading} = useSelector(state => state.tagentInfo);
+  // const { reportName } = useParams(); // gets from URL: /dashboard/:reportName
+  const reportName = 'TAGENTINFO';
+  const reportData = reports[reportName];
 
   
 
@@ -24,53 +26,9 @@ function TagentInfo() {
 
   useEffect(() => {
 
-    dispatch(fetchTagentData());
-    // const fetchData = async () => {
-    //   try {
-    //     const res = await axios.get("http://localhost:3001/report_name");
-    //     const data = res.data;
-
-    //     // Group data by BU
-    //     const grouped = data.reduce((acc, item) => {
-    //       if (!acc[item.bu]) {
-    //         acc[item.bu] = [];
-    //       }
-    //       acc[item.bu].push(item);
-    //       return acc;
-    //     }, {});
-    //     setGroupedData(grouped);
-
-    //     // Format data for chart
-    //     const merged = {};
-
-    //     data.forEach(item => {
-    //         const dateOnly = item.process_date.split(" ")[0]; // removes time
-    //         const buName = buLabels[item.bu] || item.bu;
-
-    //         if (!merged[dateOnly]) {
-    //         merged[dateOnly] = { process_date: dateOnly };
-    //         }
-
-    //         merged[dateOnly][buName] = item.quantity_processed;
-    //     });
-
-    //     const chartFormatted = Object.values(merged);
-
-    //     // Optional: sort by date (converted to YYYY/MM/DD for accuracy)
-    //     chartFormatted.sort((a, b) =>
-    //         new Date(a.process_date.split("/").reverse().join("/")) -
-    //         new Date(b.process_date.split("/").reverse().join("/"))
-    //     );
-
-    //     setChartData(chartFormatted);
-    //   } catch (err) {
-    //     console.error("Error fetching data:", err);
-    //     setError("Failed to load data");
-    //   }
-    // };
-
-    // fetchData();
-  }, [dispatch]);
+    dispatch(fetchTagentData({ reportName }));
+    
+  }, [reportName, dispatch]);
 
   return (
     <div className="dash-container">
@@ -89,11 +47,64 @@ function TagentInfo() {
         
       </div>
       
-      
+  {error ? (
+      <p style={{ color: "red" }}>{error}</p>
+    ) : !reportData ? (
+      <p>{loading}...</p>
+    ) : Object.keys(reportData.groupedData).length === 0 ? (
+      <p>No data available</p>
+    ) : (
+      <div className='row'>
 
-      {error ? (
+  <div className="card-container">
+    {["4602920", "4602389"].map((bu) => (
+      <div className="card" key={bu}>
+        <h2>{buLabels[bu] || `BU: ${bu}`}</h2>
+        <table className="table" border="1">
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Start Date</th>
+              <th>End Date</th>
+              <th>Process Date</th>
+              <th>Quantity</th>
+            </tr>
+          </thead>
+          <tbody>
+            {reportData.groupedData[bu]?.map((item, idx) => (
+              <tr key={item.id || idx}>
+                <td>{item.id || idx + 1}</td>
+                <td>{item.start_date}</td>
+                <td>{item.end_date}</td>
+                <td>{item.process_date}</td>
+                <td>{item.quantity_processed || "-"}</td> {/* adjust as needed */}
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    ))}
+     
+    
+  </div>
+  <div className='row my-5'>
+        <div className='graph'>
+          <div className='card'>
+              <h1>Here goes our graph</h1>
+              <LineChart data={reportData.chartData} />
+          </div>
+          
+        </div>
+          
+      </div>
+  
+  </div>
+  
+)}
+
+      {/* {error ? (
         <p style={{ color: "red" }}>{error}</p>
-      ) : Object.keys(groupedData).length === 0 ? (
+      ) : Object.keys(reportData.groupedData).length === 0 ? (
         <p>Loading...{loading}</p>
       ) : (
         <div className='row'>
@@ -113,7 +124,7 @@ function TagentInfo() {
                   </tr>
                 </thead>
                 <tbody>
-                  {groupedData[bu]?.map((item) => (
+                  {reportData.groupedData[bu]?.map((item) => (
                     <tr key={item.id}>
                       <td>{item.id}</td>
                       <td>{item.start_date}</td>
@@ -131,14 +142,14 @@ function TagentInfo() {
         <div className='graph'>
           <div className='card'>
               <h1>Here goes our graph</h1>
-              <LineChart data={chartData} />
+              <LineChart data={reportData.chartData} />
           </div>
           
         </div>
           
       </div>
         </div>
-      )}
+      )} */}
       
     </div>
   );

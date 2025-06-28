@@ -1,3 +1,116 @@
+// import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
+// import axios from 'axios';
+
+// // BU label mapping
+// const buLabels = {
+//   "4602920": "C47",
+//   "4602389": "C51"
+// };
+
+// // Async thunk for fetching and formatting the data
+// export const fetchTagentData = createAsyncThunk(
+//   'tagentInfo/fetchData',
+//   async (_, { rejectWithValue }) => {
+//     try {
+//       const res = await axios.get('http://127.0.0.1:8000/dashboard/TAGENTINFO'); //http://localhost:3001/report_name' //'http://localhost:8000/dashboard'
+//       const data = res.data.summary;
+//       const tagentinfo = res.data.tagentinfo;
+//       // const data = res.data;
+
+//       // Grouped data by BU
+//       const grouped = data.reduce((acc, item) => {
+//         if (!acc[item.bu]) acc[item.bu] = [];
+//         acc[item.bu].push(item);
+//         return acc;
+//       }, {});
+
+//       // Format data for chart
+//       // const merged = {};
+//       // data.forEach(item => {
+//       //   const dateOnly = item.process_date.split(" ")[0];
+//       //   const buName = buLabels[item.bu] || item.bu;
+
+//       //   if (!merged[dateOnly]) {
+//       //     merged[dateOnly] = { process_date: dateOnly };
+//       //   }
+
+//       //   merged[dateOnly][buName] = item.quantity_processed;
+//       // });
+
+//       // const chartFormatted = Object.values(merged).sort((a, b) =>
+//       //   new Date(a.process_date.split("/").reverse().join("/")) -
+//       //   new Date(b.process_date.split("/").reverse().join("/"))
+//       // );
+
+//       // return {
+//       //   groupedData: grouped,
+//       //   chartData: chartFormatted
+//       // };
+//       // Format tagentinfo for chart
+//       const merged = {};
+
+//       tagentinfo.forEach(item => {
+//         const date = item.datadados; // already in YYYY-MM-DD
+//         const [year, month, day] = date.split("-");
+//         const displayDate = `${day}/${month}/${year}`; // chart expects DD/MM/YYYY
+
+//         const buName = buLabels[item.bu] || item.bu;
+//         const quantity = item.quantidade;
+
+//         if (!merged[displayDate]) {
+//           merged[displayDate] = { process_date: displayDate };
+//         }
+
+//         merged[displayDate][buName] = quantity;
+//       });
+
+//       // Sort chart data by date ascending
+//       const chartFormatted = Object.values(merged).sort((a, b) =>
+//         new Date(a.process_date.split("/").reverse().join("/")) -
+//         new Date(b.process_date.split("/").reverse().join("/"))
+//       );
+//       console.log(chartFormatted);
+//       return {
+//         groupedData: grouped,
+//         chartData: chartFormatted
+//       };
+      
+//     } catch (error) {
+//       return rejectWithValue(error?.message || error.toString());
+//     }
+//   }
+// );
+
+// const tagentInfoSlice = createSlice({
+//   name: 'tagentInfo',
+//   initialState: {
+//     groupedData: {},
+//     chartData: [],
+//     error: null,
+//     loading: false
+//   },
+//   reducers: {},
+//   extraReducers: (builder) => {
+//     builder
+//       .addCase(fetchTagentData.pending, (state) => {
+//         state.loading = true;
+//         state.error = null;
+//       })
+//       .addCase(fetchTagentData.fulfilled, (state, action) => {
+//         state.loading = false;
+//         state.groupedData = action.payload.groupedData;
+//         state.chartData = action.payload.chartData;
+//       })
+//       .addCase(fetchTagentData.rejected, (state, action) => {
+//         state.loading = false;
+//         state.error = action.payload;
+//       });
+//   }
+// });
+
+// export default tagentInfoSlice.reducer;
+// src/features/tagentInfo/tagentInfoSlice.js
+
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import axios from 'axios';
 
@@ -7,52 +120,27 @@ const buLabels = {
   "4602389": "C51"
 };
 
-// Async thunk for fetching and formatting the data
 export const fetchTagentData = createAsyncThunk(
   'tagentInfo/fetchData',
-  async (_, { rejectWithValue }) => {
+  async ({ reportName }, { rejectWithValue }) => {
     try {
-      const res = await axios.get('http://127.0.0.1:8000/dashboard'); //http://localhost:3001/report_name' //'http://localhost:8000/dashboard'
+      const res = await axios.get(`http://127.0.0.1:8000/dashboard/${reportName}`);
       const data = res.data.summary;
-      const tagentinfo = res.data.tagentinfo;
-      // const data = res.data;
+      const graphinfo = res.data.totalcount;
 
-      // Grouped data by BU
+      // Group by BU
       const grouped = data.reduce((acc, item) => {
         if (!acc[item.bu]) acc[item.bu] = [];
         acc[item.bu].push(item);
         return acc;
       }, {});
 
-      // Format data for chart
-      // const merged = {};
-      // data.forEach(item => {
-      //   const dateOnly = item.process_date.split(" ")[0];
-      //   const buName = buLabels[item.bu] || item.bu;
-
-      //   if (!merged[dateOnly]) {
-      //     merged[dateOnly] = { process_date: dateOnly };
-      //   }
-
-      //   merged[dateOnly][buName] = item.quantity_processed;
-      // });
-
-      // const chartFormatted = Object.values(merged).sort((a, b) =>
-      //   new Date(a.process_date.split("/").reverse().join("/")) -
-      //   new Date(b.process_date.split("/").reverse().join("/"))
-      // );
-
-      // return {
-      //   groupedData: grouped,
-      //   chartData: chartFormatted
-      // };
-      // Format tagentinfo for chart
+      // Format chart data
       const merged = {};
-
-      tagentinfo.forEach(item => {
-        const date = item.datadados; // already in YYYY-MM-DD
+      graphinfo.forEach(item => {
+        const date = item.datadados; // YYYY-MM-DD
         const [year, month, day] = date.split("-");
-        const displayDate = `${day}/${month}/${year}`; // chart expects DD/MM/YYYY
+        const displayDate = `${day}/${month}/${year}`; // DD/MM/YYYY
 
         const buName = buLabels[item.bu] || item.bu;
         const quantity = item.quantidade;
@@ -64,32 +152,34 @@ export const fetchTagentData = createAsyncThunk(
         merged[displayDate][buName] = quantity;
       });
 
-      // Sort chart data by date ascending
       const chartFormatted = Object.values(merged).sort((a, b) =>
         new Date(a.process_date.split("/").reverse().join("/")) -
         new Date(b.process_date.split("/").reverse().join("/"))
       );
-      console.log(chartFormatted);
+
       return {
+        reportName,
         groupedData: grouped,
         chartData: chartFormatted
       };
-      
     } catch (error) {
       return rejectWithValue(error?.message || error.toString());
     }
   }
 );
-
 const tagentInfoSlice = createSlice({
   name: 'tagentInfo',
   initialState: {
-    groupedData: {},
-    chartData: [],
-    error: null,
-    loading: false
+    reports: {},           // Stores data per report
+    currentReport: null,   // Points to currently selected report
+    loading: false,
+    error: null
   },
-  reducers: {},
+  reducers: {
+    setCurrentReport(state, action) {
+      state.currentReport = action.payload;
+    }
+  },
   extraReducers: (builder) => {
     builder
       .addCase(fetchTagentData.pending, (state) => {
@@ -97,9 +187,10 @@ const tagentInfoSlice = createSlice({
         state.error = null;
       })
       .addCase(fetchTagentData.fulfilled, (state, action) => {
+        const { reportName, groupedData, chartData } = action.payload;
         state.loading = false;
-        state.groupedData = action.payload.groupedData;
-        state.chartData = action.payload.chartData;
+        state.reports[reportName] = { groupedData, chartData };
+        state.currentReport = reportName;
       })
       .addCase(fetchTagentData.rejected, (state, action) => {
         state.loading = false;
@@ -108,4 +199,5 @@ const tagentInfoSlice = createSlice({
   }
 });
 
+export const { setCurrentReport } = tagentInfoSlice.actions;
 export default tagentInfoSlice.reducer;
