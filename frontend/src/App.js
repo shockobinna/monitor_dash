@@ -1,36 +1,11 @@
-// import React from 'react';
-// import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
-
-// // Import your pages or components
-// // import Home from './pages/Home';
-// // import About from './pages/About';
-// // import NotFound from './pages/NotFound';
-// import TagentInfo from './components/relatorios/TagentInfo'
-
-// function App() {
-//   return (
-//     <Router>
-//       <div className="App">
-//         {/* You can add a navbar or layout here */}
-//         <Routes>
-//           <Route path="/" element={<TagentInfo />} />
-//           {/* <Route path="/about" element={<About />} />
-//           <Route path="*" element={<NotFound />} /> */}
-//         </Routes>
-//       </div>
-//     </Router>
-//   );
-// }
-
-// export default App;
 
 import React from 'react';
 import { HashRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import Sidebar from './components/Sidebar';
 import TagentInfo from './components/relatorios/TagentInfo';
-// import InventoryReport from './components/relatorios/InventoryReport';
-// import CustomerReport from './components/relatorios/CustomerReport';
-// import './App.css';
+import HsplitD1 from './components/relatorios/HsplitD1';
+import BilLogD1 from './components/relatorios/BilLogD1';
+import HagentD1 from './components/relatorios/HagentD1';
 
 function App() {
   return (
@@ -41,9 +16,9 @@ function App() {
           <Routes>
             <Route path="/" element={<Navigate to="/tagentinfo" />} />
             <Route path="/tagentinfo" element={<TagentInfo />} />
-            {/* <Route path="/hagentD1" element={<InventoryReport />} />
-            <Route path="/hsplitD1" element={<CustomerReport />} />
-            <Route path="/billogD1" element={<CustomerReport />} /> */}
+            <Route path="/hagentD1" element={<HagentD1 />} />
+            <Route path="/hsplitD1" element={<HsplitD1 />} />
+            <Route path="/billogD1" element={<BilLogD1 />} />
             <Route path="*" element={<h2>404 - Not Found</h2>} />
           </Routes>
         </div>
