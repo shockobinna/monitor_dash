@@ -17,7 +17,7 @@
   margin-bottom: 20px;
   margin-left: 5px;
 }
-
+/* 
 .card-container, .graph{
   display: flex;
   gap: 20px;
@@ -44,9 +44,12 @@
   padding: 8px;
   text-align: left;
   border: 1px solid #ddd;
-}
+} */
 @media (max-width: 1024px) {
   .card {
+    width: 100%;
+  }
+  .table {
     width: 100%;
   }
 }

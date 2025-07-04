@@ -1,6 +1,6 @@
 import ReportLayout from "../shared/RelatorioLayout";
 
-function HsplitD1() {
+function HSplitD1() {
   return <ReportLayout reportName="HSplitD1" />;
 }
-export default HsplitD1;
+export default HSplitD1;

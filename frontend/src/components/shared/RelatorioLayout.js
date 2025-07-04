@@ -1,25 +1,106 @@
 import React, { useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { fetchTagentData } from '../../features/tagentinfo/tagentInfoSlice';
-import LineChart from '../charts/LineChart';
-import './RelatorioLayout.css'
+// import { fetchHagentData } from '../../features/hagent/hagentSlice';
+// import { fetchBillogData } from '../../features/billog/billogSlice';
 
-const buLabels = {
-  "4602920": "C47",
-  "4602389": "C51"
+import LayoutType1 from './LayoutType1';
+// import LayoutType2 from './LayoutType2';
+// import LayoutType3 from './LayoutType3';
+import './RelatorioLayout.css';
+
+// Configuration object to map reportName to dispatch, slice, and layout
+const reportConfig = {
+  // First 4 reports - same layout and slice
+  TAGENTINFO: {
+    layout: LayoutType1,
+    fetchAction: fetchTagentData,
+    selector: state => state.tagentInfo,
+  },
+  HAgentD1: {
+    layout: LayoutType1,
+    fetchAction: fetchTagentData,
+    selector: state => state.tagentInfo,
+  },
+  HSplitD1: {
+    layout: LayoutType1,
+    fetchAction: fetchTagentData,
+    selector: state => state.tagentInfo,
+  },
+  BILLOGD1: {
+    layout: LayoutType1,
+    fetchAction: fetchTagentData,
+    selector: state => state.tagentInfo,
+  },
+
+  // // Next 4 reports - different slice and layout
+  // report5: {
+  //   layout: LayoutType2,
+  //   fetchAction: fetchHagentData,
+  //   selector: state => state.hagent,
+  // },
+  // report6: {
+  //   layout: LayoutType2,
+  //   fetchAction: fetchHagentData,
+  //   selector: state => state.hagent,
+  // },
+  // report7: {
+  //   layout: LayoutType2,
+  //   fetchAction: fetchHagentData,
+  //   selector: state => state.hagent,
+  // },
+  // report8: {
+  //   layout: LayoutType2,
+  //   fetchAction: fetchHagentData,
+  //   selector: state => state.hagent,
+  // },
+
+  // // Final 4 reports - different slice and layout
+  // report9: {
+  //   layout: LayoutType3,
+  //   fetchAction: fetchBillogData,
+  //   selector: state => state.billog,
+  // },
+  // report10: {
+  //   layout: LayoutType3,
+  //   fetchAction: fetchBillogData,
+  //   selector: state => state.billog,
+  // },
+  // report11: {
+  //   layout: LayoutType3,
+  //   fetchAction: fetchBillogData,
+  //   selector: state => state.billog,
+  // },
+  // report12: {
+  //   layout: LayoutType3,
+  //   fetchAction: fetchBillogData,
+  //   selector: state => state.billog,
+  // },
 };
 
 function ReportLayout({ reportName }) {
   const dispatch = useDispatch();
-  const { reports, error, loading } = useSelector(state => state.tagentInfo);
-  const reportData = reports[reportName];
+
+  const config = reportConfig[reportName];
+
+
+  const { layout: LayoutComponent, fetchAction, selector } = config;
+
+  const { reports, loading, error } = useSelector(selector);
+  const reportData = reports?.[reportName];
 
   useEffect(() => {
-    dispatch(fetchTagentData({ reportName }));
-  }, [reportName, dispatch]);
+    dispatch(fetchAction({ reportName }));
+  }, [dispatch, fetchAction, reportName]);
+
+  // fallback for unknown report
+  if (!config) {
+    return <p>Invalid or unsupported report name: {reportName}</p>;
+  }
 
   return (
     <div className="dash-container">
+      {/* Header with search */}
       <div className='row align-items-stretch mb-5'>
         <div className='col d-flex align-items-end'>
           <h1 className="title m-0">
@@ -34,54 +115,15 @@ function ReportLayout({ reportName }) {
         </div>
       </div>
 
+      {/* Main content */}
       {error ? (
-        <p style={{ color: 'red' }}>{error}</p>
+        <p className="text-danger">{error}</p>
       ) : !reportData ? (
         <p>{loading}...</p>
-      ) : Object.keys(reportData.groupedData).length === 0 ? (
+      ) : Object.keys(reportData.groupedData || {}).length === 0 ? (
         <p>No data available</p>
       ) : (
-        <div className='row'>
-          <h1>Relatório D -0</h1>
-          <div className="card-container">
-            {["4602920", "4602389"].map((bu) => (
-              <div className="card" key={bu}>
-                <h2>{buLabels[bu] || `BU: ${bu}`}</h2>
-                <table className="table" border="1">
-                  <thead>
-                    <tr>
-                      <th>ID</th>
-                      <th>Start Date</th>
-                      <th>End Date</th>
-                      <th>Process Date</th>
-                      <th>Quantity</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {reportData.groupedData[bu]?.map((item, idx) => (
-                      <tr key={item.id || idx}>
-                        <td>{item.id || idx + 1}</td>
-                        <td>{item.start_date}</td>
-                        <td>{item.end_date}</td>
-                        <td>{item.process_date}</td>
-                        <td>{item.quantity_processed || '-'}</td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            ))}
-          </div>
-
-          <div className='row my-5'>
-            <div className='graph'>
-              <div className='card'>
-                <h1>Relatório D -1</h1>
-                <LineChart data={reportData.chartData} />
-              </div>
-            </div>
-          </div>
-        </div>
+        <LayoutComponent reportData={reportData} reportName={reportName}/>
       )}
     </div>
   );
