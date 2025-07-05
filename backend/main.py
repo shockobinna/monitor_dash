@@ -68,11 +68,11 @@ ALLOWED_REPORTS = {"TAGENTINFO",
                    "CALLBACK_ORIGEM",
                    "AGENTS_LOG",
                    "LOGINLOGOUT",
-                   "REALTIME",
-                   "DISCADORMAILIN",
-                   "PERSONALCONNECT",
-                   "DATADOWNLOAD552",
-                   "NEOINXNICE"
+                   "DISCADOR_MAILING",
+                   "PERSONALCONNECT_MAILING",
+                   "NEOINXNICE",
+                   "VW_NEOINNICERELATORIO_NEW",
+                   "NICE_552"
                    }
 
 @app.get("/dashboard/{report_name}")
@@ -306,7 +306,22 @@ async def get_table_count(report_name: str):
     if report_key not in ALLOWED_REPORTS:
         raise HTTPException(status_code=400, detail="Invalid report name")
     
+    lookup_field = ""
     
+    if report_key == "LOGINLOGOUT" or report_key == "CALLBACK_DESTINO" or report_key == "CALLBACK_ORIGEM":
+        lookup_field = "row_date"
+    elif report_key == "AGENTS_LOG":
+        lookup_field = "END_DATE"
+    elif report_key == "PERSONALCONNECT_MAILING":
+        lookup_field = "data_chamada"
+    # elif report_key == "HAGENTD1":
+    #     lookup_field = "row_date"
+    # elif report_key == "TAGENTINFO":
+    #     lookup_field = "row_date"
+    else:
+        raise HTTPException(status_code=400, detail="Invalid report name")
+    
+    print(f"Lookup field: {lookup_field}")
     
     table_name_c47 = f"TB_REL_NICE_{report_key}_C47"
     table_name_c51 = f"TB_REL_NICE_{report_key}_C51"
@@ -321,29 +336,29 @@ async def get_table_count(report_name: str):
         sql_countinfo = f"""
             SELECT 
                 COUNT(*) AS quantidade, 
-                TO_CHAR(row_date, 'YYYY-MM-DD') AS dataDados,
+                TO_CHAR({lookup_field}, 'YYYY-MM-DD') AS dataDados,
                 'c47' AS origem
             FROM 
                 {table_name_c47}
             WHERE 
-                row_date >= TRUNC(SYSDATE) - 7 
-                AND row_date <= TRUNC(SYSDATE)
+                {lookup_field} >= TRUNC(SYSDATE) - 7 
+                AND {lookup_field} <= TRUNC(SYSDATE)
             GROUP BY 
-                origem, TO_CHAR(row_date, 'YYYY-MM-DD')
+                origem, TO_CHAR({lookup_field}, 'YYYY-MM-DD')
 
             UNION ALL
 
             SELECT 
                 COUNT(*) AS quantidade,  
-                TO_CHAR(row_date, 'YYYY-MM-DD') AS dataDados,
+                TO_CHAR({lookup_field}, 'YYYY-MM-DD') AS dataDados,
                 'c51' AS origem
             FROM 
                 {table_name_c51}
             WHERE 
-                row_date >= TRUNC(SYSDATE) - 7 
-                AND row_date <= TRUNC(SYSDATE)
+                {lookup_field} >= TRUNC(SYSDATE) - 7 
+                AND {lookup_field} <= TRUNC(SYSDATE)
             GROUP BY 
-                origem, TO_CHAR(row_date, 'YYYY-MM-DD')
+                origem, TO_CHAR({lookup_field}, 'YYYY-MM-DD')
 
             ORDER BY 
                 dataDados DESC, origem

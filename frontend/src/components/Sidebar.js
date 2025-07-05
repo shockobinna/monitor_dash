@@ -15,7 +15,8 @@ const reports = [
   { id:'neoinxnice', name:'NeoInXNice'},
   { id:'agentslog ', name:'Agents Log'},
   { id:'loginlogout ', name:'LoginLogout'},
-  { id:'callback ', name:'Callback '}
+  { id:'callbackdestino ', name:'Callback Destino'},
+  { id:'callbackdeorigem ', name:'Callback Origem'}
 
 
 ];

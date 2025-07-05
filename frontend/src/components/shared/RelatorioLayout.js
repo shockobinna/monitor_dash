@@ -6,7 +6,8 @@ import { fetchCallBackData } from '../../features/tagentinfo/callbackInfoSlice';
 
 import LayoutType1 from './LayoutType1';
 import LayoutType2 from './LayoutType2';
-// import LayoutType3 from './LayoutType3';
+import LayoutType3 from './LayoutType3';
+import LayoutType4 from './LayoutType4';
 import './RelatorioLayout.css';
 
 // Configuration object to map reportName to dispatch, slice, and layout
@@ -39,33 +40,38 @@ const reportConfig = {
     fetchAction: fetchCallBackData,
     selector: state => state.callbackInfo,
   },
-  // report6: {
-  //   layout: LayoutType2,
-  //   fetchAction: fetchHagentData,
-  //   selector: state => state.hagent,
-  // },
-  // report7: {
-  //   layout: LayoutType2,
-  //   fetchAction: fetchHagentData,
-  //   selector: state => state.hagent,
-  // },
-  // report8: {
-  //   layout: LayoutType2,
-  //   fetchAction: fetchHagentData,
-  //   selector: state => state.hagent,
-  // },
+  CALLBACK_DESTINO: {
+    layout: LayoutType2,
+    fetchAction: fetchCallBackData,
+    selector: state => state.callbackInfo,
+  },
+  CALLBACK_ORIGEM: {
+    layout: LayoutType2,
+    fetchAction: fetchCallBackData,
+    selector: state => state.callbackInfo,
+  },
+  PERSONALCONNECT_MAILING: {
+    layout: LayoutType2,
+    fetchAction: fetchCallBackData,
+    selector: state => state.callbackInfo,
+  },
+  AGENTS_LOG: {
+    layout: LayoutType2,
+    fetchAction: fetchCallBackData,
+    selector: state => state.callbackInfo,
+  },
 
-  // // Final 4 reports - different slice and layout
-  // report9: {
-  //   layout: LayoutType3,
-  //   fetchAction: fetchBillogData,
-  //   selector: state => state.billog,
-  // },
-  // report10: {
-  //   layout: LayoutType3,
-  //   fetchAction: fetchBillogData,
-  //   selector: state => state.billog,
-  // },
+  
+  DISCADOR_MAILING: {
+    layout: LayoutType3,
+    fetchAction: fetchBillogData,
+    selector: state => state.billog,
+  },
+  NICE_552: {
+    layout: LayoutType4,
+    fetchAction: fetchBillogData,
+    selector: state => state.billog,
+  },
   // report11: {
   //   layout: LayoutType3,
   //   fetchAction: fetchBillogData,
