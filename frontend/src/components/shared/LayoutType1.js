@@ -12,7 +12,7 @@ function LayoutType1({ reportData, reportName }) {
       <h3>{reportName} D -0</h3>
       <div className="card-container">
         {["4602920", "4602389"].map((bu) => (
-          <div className="card" key={bu}>
+          <div className="card-layout1" key={bu}>
             <h2>{buLabels[bu] || `BU: ${bu}`}</h2>
             <table className="table" border="1">
               <thead>
@@ -40,7 +40,7 @@ function LayoutType1({ reportData, reportName }) {
 
       <div className='row my-5'>
         <div className='graph'>
-          <div className='card'>
+          <div className='card-layout1'>
             <h3>{reportName} D -1</h3>
             <LineChart data={reportData.chartData}/>
           </div>

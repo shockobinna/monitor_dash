@@ -6,6 +6,7 @@ import TagentInfo from './components/relatorios/TagentInfo';
 import HsplitD1 from './components/relatorios/HsplitD1';
 import BilLogD1 from './components/relatorios/BilLogD1';
 import HagentD1 from './components/relatorios/HagentD1';
+import LoginLogout from './components/relatorios/LoginLogout';
 
 function App() {
   return (
@@ -19,6 +20,7 @@ function App() {
             <Route path="/hagentD1" element={<HagentD1 />} />
             <Route path="/hsplitD1" element={<HsplitD1 />} />
             <Route path="/billogD1" element={<BilLogD1 />} />
+            <Route path="/loginlogout" element={<LoginLogout />} />
             <Route path="*" element={<h2>404 - Not Found</h2>} />
           </Routes>
         </div>

@@ -60,7 +60,20 @@ async def dashboard_health_check():
     return Response(status_code=200)
 
 
-ALLOWED_REPORTS = {"TAGENTINFO", "HAGENTD1", "HSPLITD1", "BILLOGD1"}
+ALLOWED_REPORTS = {"TAGENTINFO", 
+                   "HAGENTD1", 
+                   "HSPLITD1", 
+                   "BILLOGD1", 
+                   "CALLBACK_DESTINO",
+                   "CALLBACK_ORIGEM",
+                   "AGENTS_LOG",
+                   "LOGINLOGOUT",
+                   "REALTIME",
+                   "DISCADORMAILIN",
+                   "PERSONALCONNECT",
+                   "DATADOWNLOAD552",
+                   "NEOINXNICE"
+                   }
 
 @app.get("/dashboard/{report_name}")
 async def read_data(report_name: str):
@@ -281,6 +294,99 @@ async def read_data(report_name: str):
                     conn.close()
             except Exception as e:
                 print(f"Error closing connection: {e}")
+                
+                
+@app.get("/countreport/{report_name}")
+async def get_table_count(report_name: str):
+    print(f"I am here : {report_name}")
+    report_key = report_name.upper()
+    print(f"Report key: {report_key}")
+
+    # Validate against whitelist
+    if report_key not in ALLOWED_REPORTS:
+        raise HTTPException(status_code=400, detail="Invalid report name")
+    
+    
+    
+    table_name_c47 = f"TB_REL_NICE_{report_key}_C47"
+    table_name_c51 = f"TB_REL_NICE_{report_key}_C51"
+    print(f"in the else block :{table_name_c47} and {table_name_c51}")
+   
+    try:
+        conn = get_connection()
+        cur = conn.cursor()
+
+        
+        
+        sql_countinfo = f"""
+            SELECT 
+                COUNT(*) AS quantidade, 
+                TO_CHAR(row_date, 'YYYY-MM-DD') AS dataDados,
+                'c47' AS origem
+            FROM 
+                {table_name_c47}
+            WHERE 
+                row_date >= TRUNC(SYSDATE) - 7 
+                AND row_date <= TRUNC(SYSDATE)
+            GROUP BY 
+                origem, TO_CHAR(row_date, 'YYYY-MM-DD')
+
+            UNION ALL
+
+            SELECT 
+                COUNT(*) AS quantidade,  
+                TO_CHAR(row_date, 'YYYY-MM-DD') AS dataDados,
+                'c51' AS origem
+            FROM 
+                {table_name_c51}
+            WHERE 
+                row_date >= TRUNC(SYSDATE) - 7 
+                AND row_date <= TRUNC(SYSDATE)
+            GROUP BY 
+                origem, TO_CHAR(row_date, 'YYYY-MM-DD')
+
+            ORDER BY 
+                dataDados DESC, origem
+        """
+
+        # Execute and fetch
+        cur.execute(sql_countinfo)
+        rows = cur.fetchall()
+
+        # Build the totalcount list
+        totalcount = [
+            {
+                "id": idx,
+                "quantidade": row[0],
+                "datadados": str(row[1]),
+                "bu": row[2],
+            }
+            for idx, row in enumerate(rows, start=1)
+        ]
+        print(totalcount)
+
+        return {
+            "totalcount": totalcount
+        }
+        
+    except Exception as e:
+        import traceback
+        traceback.print_exc()
+        return JSONResponse(status_code=500, content={"error": str(e)})
+    
+    finally:
+        try:
+            if cur:
+                cur.close()
+        except Exception as e:
+            print(f"Error closing cursor: {e}")
+
+        try:
+            if conn:
+                conn.close()
+        except Exception as e:
+            print(f"Error closing connection: {e}")
+
                 
     
 # uvicorn main:app --host 127.0.0.1 --port 8000 --reload

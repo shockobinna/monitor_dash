@@ -1,11 +1,11 @@
 import React, { useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { fetchTagentData } from '../../features/tagentinfo/tagentInfoSlice';
-// import { fetchHagentData } from '../../features/hagent/hagentSlice';
+import { fetchCallBackData } from '../../features/tagentinfo/callbackInfoSlice';
 // import { fetchBillogData } from '../../features/billog/billogSlice';
 
 import LayoutType1 from './LayoutType1';
-// import LayoutType2 from './LayoutType2';
+import LayoutType2 from './LayoutType2';
 // import LayoutType3 from './LayoutType3';
 import './RelatorioLayout.css';
 
@@ -34,11 +34,11 @@ const reportConfig = {
   },
 
   // // Next 4 reports - different slice and layout
-  // report5: {
-  //   layout: LayoutType2,
-  //   fetchAction: fetchHagentData,
-  //   selector: state => state.hagent,
-  // },
+  LOGINLOGOUT: {
+    layout: LayoutType2,
+    fetchAction: fetchCallBackData,
+    selector: state => state.callbackInfo,
+  },
   // report6: {
   //   layout: LayoutType2,
   //   fetchAction: fetchHagentData,
@@ -82,12 +82,15 @@ function ReportLayout({ reportName }) {
   const dispatch = useDispatch();
 
   const config = reportConfig[reportName];
+  console.log(config)
 
 
   const { layout: LayoutComponent, fetchAction, selector } = config;
 
   const { reports, loading, error } = useSelector(selector);
   const reportData = reports?.[reportName];
+
+  console.log(reportData)
 
   useEffect(() => {
     dispatch(fetchAction({ reportName }));
